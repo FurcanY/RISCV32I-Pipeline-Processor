@@ -1,23 +1,27 @@
 module tb ();
-    logic a,b,c;
-    test_xor i_test_xor (
-        .a(a),
-        .b(b),
-        .c(c)
-    );
-    initial begin
+    logic [riscv_pkg::XLEN-1:0] addr;
+    logic [riscv_pkg::XLEN-1:0] data;
+    logic [riscv_pkg::XLEN-1:0] pc;
+    logic                       update;
 
-        a = 0;
-        b = 0;
-        #1  a = 1;  b = 0;
-        #1  a = 1;  b = 1;
-        #1  a = 0;  b = 1;
-        #1  a = 0;  b = 'x; // those are not properly supported yet
-        #1  a = 1;  b = 'x; // those are not properly supported yet
-        #1  a = 1;  b = 'z; // those are not properly supported yet
-        #1  a = 0;  b = 'z; // those are not properly supported yet
-        #1;
-        
+    core_model i_core_model(
+        .addr_i(addr),
+        .update_o(update),
+        .data_o(data),
+        .pc_o(pc)
+    );
+
+    initial begin
+        forever begin
+            if (update) begin
+                $display("pc: %0h", pc);
+                #1;
+            end
+        end
+    end
+
+    initial begin
+        #10;
         $finish;
     end
 
