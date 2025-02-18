@@ -1,21 +1,128 @@
 module core_model
   import riscv_pkg::*;
 (
-    input logic  [XLEN-1:0] addr_i,
-    output logic            update_o,
-    output logic [XLEN-1:0] data_o,
+    input  logic clk_i,
+    input  logic rstn_i,
+    input  logic  [XLEN-1:0] addr_i,
+    output logic             update_o,
+    output logic  [XLEN-1:0] data_o,
     output logic  [XLEN-1:0] pc_o
 );
-    initial $display(":):):)");
-    initial begin
-      update_o = 0;
-      #1;
-      update_o = 1;
+
+    // memory
+    parameter MEM_SIZE 1024;
+    logic [MEM_SIZE-1:0] imem [31:0];
+    logic [MEM_SIZE-1:0] dmem [31:0];
+    
+    // pc + instr
+    logic [XLEN-1:0] pc_d;
+    logic [XLEN-1:0] pc_q;
+    logic [XLEN-1:0] jump_pc_d;
+    logic            jump_pc_valid_d;
+    logic [XLEN-1:0] instr_d;
+
+
+    always_ff @(posedge clk_i) begin : pc_change_ff
+      if (~rstn_i) begin
+        pc_q <= '0;
+      end else begin
+        pc_q <= pc_d;
+      end
     end
 
-    /* design an 1KB instruction memory */
-    /* design an 1KB data memory */
-    /* design a fetch */
+    always_comb begin : pc_change_comb
+      pc_d = pc_q;
+      if (jump_pc_valid_d) begin
+        pc_d = jump_pc_d;
+      end else begin
+        pc_d = pc_q + 4;
+      end
+        instr_d = imem[pc_d[$clog(MEM_SIZE)-1:0]];
+    end
+
+    always_comb begin
+      case(instr_d[6:0])
+        OpcodeLui:  //load upper imadiate
+        OpcodeAuipc:
+        OpcodeJal:
+        OpcodeJalr:
+        OpcodeBranch:
+          case(instr_d[14:12])
+            F3_BEQ  :
+            F3_BNE  :
+            F3_BLT  :
+            F3_BGE  :
+            F3_BLTU :
+            F3_BGEU :
+          endcase
+        OpcodeLoad:
+          case(instr_d[14:12])
+            F3_LB  :
+            F3_LH  :
+            F3_LW  :
+            F3_LBU :
+            F3_LHU :
+          endcase
+        OpcodeStore:
+          case(instr_d[14:12])
+            F3_SB : 
+            F3_SH : 
+            F3_SW : 
+          endcase
+        OpcodeOpImm:
+          case(instr_d[14:12])
+            F3_ADDI :
+            F3_SLTI :
+            F3_SLTIU:
+            F3_XORI :
+            F3_ORI  :
+            F3_ANDI :
+            F3_SLLI :
+              if (instr_d[31:25] == F7_SLLI) begin
+              end
+            F3_SRLI :
+              if (instr_d[31:25] == F7_SRLI) begin
+              end
+            F3_SRAI :
+              if (instr_d[31:25] == F7_SRAI) begin
+              end
+          endcase
+        OpcodeOp:
+          case(instr_d[14:12])
+            F3_ADD :
+              if (instr_d[31:25] == F7_ADD) begin
+              end
+            F3_SUB :
+              if (instr_d[31:25] == F7_SUB) begin
+              end
+            F3_SLL :
+              if (instr_d[31:25] == F7_SLL) begin
+              end
+            F3_SLT :
+              if (instr_d[31:25] == F7_SLT) begin
+              end
+            F3_SLTU:
+              if (instr_d[31:25] == F7_SLTU) begin
+              end
+            F3_XOR :
+              if (instr_d[31:25] == F7_XOR) begin
+              end
+            F3_SRL :
+              if (instr_d[31:25] == F7_SRL) begin
+              end
+            F3_SRA :
+              if (instr_d[31:25] == F7_SRA) begin
+              end
+            F3_OR  :
+              if (instr_d[31:25] == F7_OR) begin
+              end
+            F3_AND :
+              if (instr_d[31:25] == F7_AND) begin
+              end
+          endcase
+      endcase
+    end
+
     /* design a decode */
     /* design a execute and memory */
     /* design a write_back */

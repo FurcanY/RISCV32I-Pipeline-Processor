@@ -966,6 +966,72 @@ package riscv_pkg;
     endcase
   endfunction
 
+  typedef enum logic [2:0] {
+    F3_BEQ   = 3'b000,
+    F3_BNE   = 3'b001,
+    F3_BLT   = 3'b100,
+    F3_BGE   = 3'b101,
+    F3_BLTU  = 3'b110,
+    F3_BGEU  = 3'b111
+  } branch_funct3_e;
+
+  typedef enum logic [2:0] {
+    F3_LB  = 3'b000,
+    F3_LH  = 3'b001,
+    F3_LW  = 3'b010,
+    F3_LBU = 3'b100,
+    F3_LHU = 3'b101
+  } f3_load_e;
+
+  typedef enum logic [2:0] {
+    F3_SB = 3'b000,
+    F3_SH = 3'b001,
+    F3_SW = 3'b010
+  } f3_store_e;
+
+  typedef enum logic [2:0] {
+    F3_ADDI = 3'b000,
+    F3_SLTI = 3'b010,
+    F3_SLTIU= 3'b011,
+    F3_XORI = 3'b100,
+    F3_ORI  = 3'b110,
+    F3_ANDI = 3'b111,
+    F3_SLLI = 3'b001,
+    F3_SRLI = 3'b101,
+    F3_SRAI = 3'b101
+  } f3_opimm_e;
+
+  typedef enum logic [6:0] {
+    F7_SLLI = 7'b0000000,
+    F7_SRLI = 7'b0000000,
+    F7_SRAI = 7'b0100000
+  } f7_opimm_e;
+
+  typedef enum logic [2:0] {
+    F3_ADD  = 3'b000, 
+    F3_SUB  = 3'b000, 
+    F3_SLL  = 3'b001, 
+    F3_SLT  = 3'b010, 
+    F3_SLTU = 3'b011, 
+    F3_XOR  = 3'b100, 
+    F3_SRL  = 3'b101, 
+    F3_SRA  = 3'b101, 
+    F3_OR   = 3'b110, 
+    F3_AND  = 3'b111
+  } f3_op_e;
+  
+  typedef enum logic [6:0] {
+    F7_ADD  = 7'b0000000,
+    F7_SUB  = 7'b0100000,
+    F7_SLL  = 7'b0000000,
+    F7_SLT  = 7'b0000000,
+    F7_SLTU = 7'b0000000,
+    F7_XOR  = 7'b0000000,
+    F7_SRL  = 7'b0000000,
+    F7_SRA  = 7'b0100000,
+    F7_OR   = 7'b0000000,
+    F7_AND  = 7'b0000000
+  } f7_op_e;
 
   // trace log compatible to spikes commit log feature
   // pragma translate_off
