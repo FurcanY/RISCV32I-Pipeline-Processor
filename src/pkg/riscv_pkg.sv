@@ -992,6 +992,7 @@ package riscv_pkg;
     localparam F3_SLLI = 3'b001;
     localparam F3_SRLI = 3'b101;
     localparam F3_SRAI = 3'b101;
+    localparam F3_JALR = 3'b000;
 
     localparam F7_SLLI = 7'b0000000;
     localparam F7_SRLI = 7'b0000000;
