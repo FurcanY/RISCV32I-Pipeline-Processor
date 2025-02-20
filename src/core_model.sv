@@ -10,10 +10,9 @@ module core_model
 );
 
     // memory
-    parameter MEM_SIZE 1024;
-    logic [MEM_SIZE-1:0] imem [31:0];
-    logic [MEM_SIZE-1:0] dmem [31:0];
-    
+    parameter int MEM_SIZE = 1024;
+    logic [31:0] imem [MEM_SIZE-1:0];
+    logic [31:0] dmem [MEM_SIZE-1:0];
     // pc + instr
     logic [XLEN-1:0] pc_d;
     logic [XLEN-1:0] pc_q;
@@ -37,11 +36,11 @@ module core_model
       end else begin
         pc_d = pc_q + 4;
       end
-        instr_d = imem[pc_d[$clog(MEM_SIZE)-1:0]];
+        instr_d = imem[pc_d[$clog2(MEM_SIZE)-1:0]];
     end
 
     always_comb begin
-      case(instr_d[6:0])
+      /*case(instr_d[6:0])
         OpcodeLui:  //load upper imadiate
         OpcodeAuipc:
         OpcodeJal:
@@ -120,7 +119,7 @@ module core_model
               if (instr_d[31:25] == F7_AND) begin
               end
           endcase
-      endcase
+      endcase*/
     end
 
     /* design a decode */
