@@ -47,10 +47,17 @@ module core_model
       end else begin
         pc_d = pc_q + 4;
       end
-        instr_d = imem[pc_d[$clog2(MEM_SIZE)-1:0]];
+        instr_d = imem[pc_q[$clog2(MEM_SIZE*4)-1:2]];
     end
 
     always_comb begin : decode_block
+      imm_data = 32'0;
+      shamt_data = 5'0;
+      rs1_data = 32'0;
+      rs2_data = 32'0;
+      mem_wr_data = 32'0;
+      mem_wr_addr = 32'0;
+
       case(instr_d[6:0])
         OpcodeLui:    imm_data = {instr_d[31:12] , 12'b0};
         OpcodeAuipc:  imm_data = {instr_d[31:12] , 12'b0};
@@ -141,49 +148,56 @@ module core_model
 
 
     always_comb begin : execute_block
+      jump_pc_valid_d = 0;
+      jump_pc_d = 0;
+      rd_data = 0;
+      rf_wr_enable = 0;
+      mem_wr_enable = 0;
+      mem_wr_data = 0;
+      mem_wr_addr = 0;
       case(instr_d[6:0])
         OpcodeLui: begin
           rd_data = imm_data;
           rf_wr_enable = 1'b1;
         end 
         OpcodeAuipc: begin
-          rd_data =  imm_data + pc_d;
+          rd_data =  imm_data + pc_q;
           rf_wr_enable = 1'b1;
         end
         OpcodeJal: begin
           jump_pc_valid_d = 1'b1;
-          jump_pc_d = imm_data + pc_d;
-          rd_data = pc_d + 4;
+          jump_pc_d = imm_data + pc_q;
+          rd_data = pc_q + 4;
         end
         OpcodeJalr:begin
           jump_pc_valid_d = 1'b1;
           jump_pc_d = imm_data + rs1_data;
-          rd_data = pc_d + 4;
+          rd_data = pc_q + 4;
         end
         OpcodeBranch:
           case(instr_d[14:12])
             F3_BEQ  : if (rs1_data == rs2_data) begin
-              jump_pc_d = imm_data + pc_d;
+              jump_pc_d = imm_data + pc_q;
               jump_pc_valid_d = 1'b1;
             end 
             F3_BNE  : if (rs1_data != rs2_data) begin
-              jump_pc_d = imm_data + pc_d;
+              jump_pc_d = imm_data + pc_q;
               jump_pc_valid_d = 1'b1;
             end 
             F3_BLT  : if ($signed(rs1_data) < $signed(rs2_data)) begin
-              jump_pc_d = imm_data + pc_d;
+              jump_pc_d = imm_data + pc_q;
               jump_pc_valid_d = 1'b1;
             end 
             F3_BGE  : if ($signed(rs1_data) >= $signed(rs2_data)) begin
-              jump_pc_d = imm_data + pc_d;
+              jump_pc_d = imm_data + pc_q;
               jump_pc_valid_d = 1'b1;
             end 
             F3_BLTU : if (rs1_data < rs2_data) begin
-              jump_pc_d = imm_data + pc_d;
+              jump_pc_d = imm_data + pc_q;
               jump_pc_valid_d = 1'b1;
             end 
             F3_BGEU : if (rs1_data >= rs2_data) begin
-              jump_pc_d = imm_data + pc_d;
+              jump_pc_d = imm_data + pc_q;
               jump_pc_valid_d = 1'b1;
             end 
           endcase
@@ -275,9 +289,7 @@ module core_model
               if (instr_d[31:25] == F7_ADD) begin
                 rf_wr_enable = 1'b1;
                 rd_data = rs1_data + rs2_data;
-              end
-            F3_SUB :
-              if (instr_d[31:25] == F7_SUB) begin
+              end else if (instr_d[31:25] == F7_SUB) begin
                 rf_wr_enable = 1'b1;
                 rd_data = rs1_data - rs2_data;
               end
@@ -305,9 +317,7 @@ module core_model
               if (instr_d[31:25] == F7_SRL) begin
                 rf_wr_enable = 1'b1;
                 rd_data = rs1_data >> rs2_data;
-              end
-            F3_SRA :
-              if (instr_d[31:25] == F7_SRA) begin
+              end else if (instr_d[31:25] == F7_SRA) begin
                 rf_wr_enable = 1'b1;
                 rd_data = rs1_data >>> rs2_data;
               end
