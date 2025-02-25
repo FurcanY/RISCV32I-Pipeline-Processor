@@ -335,5 +335,15 @@ module core_model
         endcase
       end
     end
-    /* design a write_back */
+
+    always_ff @(posedge clk_i) begin
+      if (!rstn_i) begin
+        for (int i=0; i<32; ++i) begin
+          rf[i] <= '0;
+        end
+      end else if (rf_wr_enable && instr_d[11:7] != '0) begin
+        rf[instr_d[11:7]] <= rd_data;
+      end
+    end
+
 endmodule
