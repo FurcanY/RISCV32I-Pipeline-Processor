@@ -21,15 +21,20 @@ module tb ();
         .reg_data_o(reg_data)
 
     );
-
+    integer file_pointer;
     initial begin
+        file_pointer = $fopen("model.log", "w");
         #4
         forever begin
             if (update) begin
                 if (reg_addr == 0) begin
-                    $display("0x%8h (0x%8h)", pc, instr);
+                    $fdisplay(file_pointer, "0x%8h (0x%8h)", pc, instr);
                 end else begin
-                    $display("0x%8h (0x%8h) x%0d 0x%8h", pc, instr, reg_addr, reg_data);
+                    if (reg_addr>9) begin
+                        $fdisplay(file_pointer, "0x%8h (0x%8h) x%0d 0x%8h", pc, instr, reg_addr, reg_data);
+                    end else begin
+                        $fdisplay(file_pointer, "0x%8h (0x%8h) x%0d  0x%8h", pc, instr, reg_addr, reg_data);
+                    end
                 end
                 #2;
             end
