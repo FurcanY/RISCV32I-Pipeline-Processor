@@ -6,20 +6,28 @@ module core_model
     input  logic  [XLEN-1:0] addr_i,
     output logic             update_o,
     output logic  [XLEN-1:0] data_o,
-    output logic  [XLEN-1:0] pc_o
+    output logic  [XLEN-1:0] pc_o,
+    output logic  [XLEN-1:0] instr_o,
+    output logic  [     4:0] reg_addr_o,
+    output logic  [XLEN-1:0] reg_data_o
 );
-
     // memory
-    parameter int MEM_SIZE = 1024;
+    parameter int MEM_SIZE = 2048;
     logic [31:0]     imem [MEM_SIZE-1:0];
     logic [31:0]     dmem [MEM_SIZE-1:0];
     logic [XLEN-1:0] rf   [31:0];
+    initial $readmemh("./test/test.hex", imem, 0, MEM_SIZE);
     // pc + instr
     logic [XLEN-1:0] pc_d;
     logic [XLEN-1:0] pc_q;
     logic [XLEN-1:0] jump_pc_d;
     logic            jump_pc_valid_d;
     logic [XLEN-1:0] instr_d;
+    assign pc_o = pc_q;
+    assign data_o = dmem[addr_i];
+    assign instr_o = instr_d;
+    assign reg_addr_o = rf_wr_enable ? instr_d[11:7] : '0;
+    assign reg_data_o = rd_data;
 
     logic [XLEN-1:0] rs1_data;      // source register 1 data
     logic [XLEN-1:0] rs2_data;      // source register 2 data
@@ -35,7 +43,9 @@ module core_model
     always_ff @(posedge clk_i) begin : pc_change_ff
       if (~rstn_i) begin
         pc_q <= '0;
+        update_o<= 0;
       end else begin
+        update_o<= 1;
         pc_q <= pc_d;
       end
     end
