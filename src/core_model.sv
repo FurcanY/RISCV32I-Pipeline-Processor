@@ -42,7 +42,7 @@ module core_model
 
     always_ff @(posedge clk_i) begin : pc_change_ff
       if (~rstn_i) begin
-        pc_q <= '0;
+        pc_q <= 'h8000_0000;
         update_o<= 0;
       end else begin
         update_o<= 1;
@@ -71,32 +71,32 @@ module core_model
       case(instr_d[6:0])
         OpcodeLui:    imm_data = {instr_d[31:12] , 12'b0};
         OpcodeAuipc:  imm_data = {instr_d[31:12] , 12'b0};
-        OpcodeJal:    imm_data = {{12'({instr_d[31]})}, instr_d[19:12], instr_d[20], instr_d[30:21], 1'b0};
+        OpcodeJal:    imm_data = {{12'(signed'(instr_d[31]))}, instr_d[19:12], instr_d[20], instr_d[30:21], 1'b0};
         OpcodeJalr: 
         if (instr_d[14:12] == F3_JALR) begin
           rs1_data = rf[instr_d[19:15]];
-          imm_data = {{21'({instr_d[31]})}, instr_d[30:20]};
+          imm_data = {{21'(signed'(instr_d[31]))}, instr_d[30:20]};
         end
         OpcodeBranch:
           if (instr_d[14:12] inside {F3_BEQ, F3_BNE, F3_BLT, F3_BGE, F3_BLTU, F3_BGEU}) begin
             rs1_data = rf[instr_d[19:15]];
             rs2_data = rf[instr_d[24:20]];
-            imm_data = {{18'({instr_d[31]})}, instr_d[31], instr_d[7], instr_d[10:5], instr_d[11:7], 1'b0};
+            imm_data = {{19'(signed'(instr_d[31]))}, instr_d[31], instr_d[7], instr_d[30:25], instr_d[11:8], 1'b0};
           end
         OpcodeLoad: begin
           rs1_data = rf[instr_d[19:15]];
-          imm_data = {{20'({instr_d[31]})}, instr_d[31:20]};
+          imm_data = {{20'(signed'(instr_d[31]))}, instr_d[31:20]};
         end
         OpcodeStore: begin
           rs1_data = rf[instr_d[19:15]];
           rs2_data = rf[instr_d[24:20]];
-          imm_data = {{20'({instr_d[31]})}, instr_d[31:25], instr_d[11:7]};
+          imm_data = {{20'(signed'(instr_d[31]))}, instr_d[31:25], instr_d[11:7]};
         end
         OpcodeOpImm:
           case(instr_d[14:12])
             F3_ADDI, F3_SLTI, F3_SLTIU, F3_XORI, F3_ORI, F3_ANDI: begin
               rs1_data = rf[instr_d[19:15]];
-              imm_data = {{20'({instr_d[31]})}, instr_d[31:20]};
+              imm_data = {{20'(signed'(instr_d[31]))}, instr_d[31:20]};
             end
             F3_SLLI:
               if (instr_d[31:25] == F7_SLLI) begin
@@ -178,6 +178,7 @@ module core_model
           jump_pc_valid_d = 1'b1;
           jump_pc_d = imm_data + pc_q;
           rd_data = pc_q + 4;
+          rf_wr_enable = 1'b1;
         end
         OpcodeJalr:begin
           jump_pc_valid_d = 1'b1;
