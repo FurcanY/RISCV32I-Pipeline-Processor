@@ -61,12 +61,12 @@ module core_model
     end
 
     always_comb begin : decode_block
-      imm_data = 32'0;
-      shamt_data = 5'0;
-      rs1_data = 32'0;
-      rs2_data = 32'0;
-      mem_wr_data = 32'0;
-      mem_wr_addr = 32'0;
+      imm_data = 32'b0;
+      shamt_data = 5'b0;
+      rs1_data = 32'b0;
+      rs2_data = 32'b0;
+      mem_wr_data = 32'b0;
+      mem_wr_addr = 32'b0;
 
       case(instr_d[6:0])
         OpcodeLui:    imm_data = {instr_d[31:12] , 12'b0};
