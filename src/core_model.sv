@@ -39,7 +39,7 @@ module core_model
     logic [XLEN-1:0] mem_wr_addr;   // memory write address
     logic            mem_wr_enable; // memory write enable
 
-
+    ///////////////////////// FETCH //////////////////
     always_ff @(posedge clk_i) begin : pc_change_ff
       if (~rstn_i) begin
         pc_q <= 'h8000_0000;
@@ -59,7 +59,9 @@ module core_model
       end
         instr_d = imem[pc_q[$clog2(MEM_SIZE*4)-1:2]];
     end
+    ///////////////////////// FETCH //////////////////
 
+    ///////////////////////// DECODE //////////////////
     always_comb begin : decode_block
       imm_data = 32'b0;
       shamt_data = 5'b0;
@@ -155,8 +157,10 @@ module core_model
           default: ;
       endcase
     end
+    ///////////////////////// DECODE //////////////////
 
 
+    ///////////////////////// EXECUTE //////////////////
     always_comb begin : execute_block
       jump_pc_valid_d = 0;
       jump_pc_d = 0;
@@ -345,7 +349,9 @@ module core_model
           endcase
       endcase
     end
+    ///////////////////////// EXECUTE //////////////////
 
+    ///////////////////////// MEMORY //////////////////
     always_ff @(posedge clk_i) begin
       if (!rstn_i) begin
       end else if (mem_wr_enable) begin
@@ -356,7 +362,9 @@ module core_model
         endcase
       end
     end
+    ///////////////////////// MEMORY //////////////////
 
+    ////////////////////// WRITE_BACK ///////////////
     always_ff @(posedge clk_i) begin
       if (!rstn_i) begin
         for (int i=0; i<32; ++i) begin
@@ -366,5 +374,6 @@ module core_model
         rf[instr_d[11:7]] <= rd_data;
       end
     end
+    ////////////////////// WRITE_BACK ///////////////
 
 endmodule
