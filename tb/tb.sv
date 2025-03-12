@@ -50,7 +50,7 @@ module tb ();
         rstn = 0;
         #4;
         rstn = 1;
-        #10000;
+        #4000;
         for (int i=0; i<10; i++) begin
             addr = i;
             $display("data @ mem[0x%8h] = %8h", addr, data);

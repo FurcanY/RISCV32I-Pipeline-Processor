@@ -330,7 +330,7 @@ module core_model
                 rd_data = rs1_data >> rs2_data;
               end else if (instr_d[31:25] == F7_SRA) begin
                 rf_wr_enable = 1'b1;
-                rd_data = rs1_data >>> rs2_data;
+                rd_data = $signed(rs1_data) >>> rs2_data;
               end
             F3_OR  :
               if (instr_d[31:25] == F7_OR) begin
